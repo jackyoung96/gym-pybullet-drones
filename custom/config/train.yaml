@@ -1,0 +1,26 @@
+RL_algo: SAC
+
+train:
+  total_timesteps: 1000000
+  save_freq: 50000
+
+model:
+  tensorboard_log: "tb_log"
+  learning_rate: 0.0003
+  buffer_size: 1000000
+  learning_starts: 100
+  batch_size: 25
+  tau: 0.01
+  gamma: 0.99
+  train_freq: 1
+  gradient_steps: 1
+  policy_kwargs:
+    net_arch: 
+      pi: [128,128]
+      qf: [400,300]
+    
+  
+
+env_kwargs:
+  # observable: [pos, quaternion, rpy, vel, angular_vel, rpm]
+  observable: [rpy, vel, angular_vel, rpm]
