@@ -25,6 +25,7 @@ import os
 import shutil
 
 from torchsummary import summary
+import torch
 
 import stable_baselines3
 from stable_baselines3 import A2C, SAC
@@ -37,33 +38,37 @@ from gym_pybullet_drones.envs.single_agent_rl.TakeoffAviary import TakeoffAviary
 from gym_pybullet_drones.envs.BaseAviary import DroneModel, Physics, BaseAviary
 from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import ActionType, ObservationType, BaseSingleAgentAviary
 from gym_pybullet_drones.utils.utils import sync, str2bool
-from envs.singleEnv.customEnv import customTakeoffAviary
+from envs.singleEnv.customEnv import customAviary
 
 from utils import configCallback, saveCallback
 
 
 def make_env(gui=False,record=False, **kwargs):
-    env = gym.make(id="takeoff-aviary-v0",
+    env = gym.make(id="takeoff-aviary-v0", # arbitrary environment that has state normalization and clipping
                     drone_model=DroneModel.CF2X,
-                    initial_xyzs=None,
-                    initial_rpys=None,
-                    physics=Physics.PYB,
+                    initial_xyzs=np.array([[0.0,0.0,2.0]]),
+                    initial_rpys=np.array([[0.0,0.0,0.0]]),
+                    physics=Physics.PYB_GND_DRAG_DW,
                     freq=240,
                     aggregate_phy_steps=1,
                     gui=gui,
                     record=record, 
                     obs=ObservationType.KIN,
                     act=ActionType.RPM)
-    env = customTakeoffAviary(env, **kwargs)
+    env = customAviary(env, **kwargs)
 
     return env
 
 def net_arch(cfg):
+    # network architecture
     net_dict = cfg['model']['policy_kwargs']['net_arch']
     if 'share' in net_dict:
         share = net_dict.pop('share')
         cfg['model']['policy_kwargs']['net_arch'] = [*share, net_dict]
-        print(cfg['model']['policy_kwargs']['net_arch'])
+
+    # Activation function
+    actv_ftn = cfg['model']['policy_kwargs']['activation_fn']
+    cfg['model']['policy_kwargs']['activation_fn'] = getattr(torch.nn, actv_ftn)
 
     return cfg
 
@@ -94,6 +99,16 @@ if __name__ == "__main__":
     except:
         pass
 
+    if cfg['train']['pretrained'] is not None:
+        if os.path.exists(os.path.join(cfg['train']['pretrained'], "final_model.zip")):
+            model.set_parameters(os.path.join(cfg['train']['pretrained'], "final_model"))
+            print("final model loaded")
+        else:
+            flist = os.listdir(os.path.join(cfg['train']['pretrained'], "ckpt"))
+            n = np.sort([int(f.split('_')[1]) for f in flist])[-1]
+            model.set_parameters(os.path.join(cfg['train']['pretrained'], "ckpt","ckpt_%d_steps"%n))
+            print("ckpt %d model loaded"%n)
+
     # save callbacks
     savecallback = saveCallback(save_freq=cfg['train']['save_freq'],
                                 name_prefix='ckpt')
@@ -112,7 +127,7 @@ if __name__ == "__main__":
                     )
     obs = env.reset()
     start = time.time()
-    for i in range(3*env.SIM_FREQ):
+    for i in range(5*env.SIM_FREQ):
         action, _states = model.predict(obs,
                                         deterministic=True
                                         )

@@ -259,6 +259,7 @@ class BaseAviary(gym.Env):
             in each subclass for its format.
 
         """
+        
         p.resetSimulation(physicsClientId=self.CLIENT)
         #### Housekeeping ##########################################
         self._housekeeping()
