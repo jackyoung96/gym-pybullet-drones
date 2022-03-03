@@ -1,5 +1,5 @@
 # custom
-custom/tb_log/
+custom/tb_log/*
 !custom/tb_log/*/final_model.zip
 
 # TODOs 
