@@ -7,6 +7,7 @@ import pybullet_data
 import numpy as np
 import pybullet as p
 import os
+import shutil
 import time
 
 from scipy.spatial.transform import Rotation as R
@@ -69,6 +70,7 @@ class customAviary(gym.Wrapper):
         #                                       physicsClientId=self.env.CLIENT
         #                                       ) for i in range(self.env.NUM_DRONES)])
 
+        shutil.rmtree('tb_log/reward_test')
         self.summary = SummaryWriter('tb_log/reward_test')
         self.reward_buf = []
         self.reward_steps = 0
@@ -387,10 +389,10 @@ class customAviary(gym.Wrapper):
             # summary_freq = 1
             if len(self.reward_buf) >= summary_freq * 100 and self.reward_steps != 0:
                 reward_buf = np.array(self.reward_buf)
-                self.summary.add_scalar("rewards/xyz", np.mean(reward_buf[:,0]), self.reward_steps)
-                self.summary.add_scalar("rewards/vel", np.mean(reward_buf[:,1]), self.reward_steps) 
-                self.summary.add_scalar("rewards/ang_vel", np.mean(reward_buf[:,2]), self.reward_steps) 
-                self.summary.add_scalar("rewards/d_action", np.mean(reward_buf[:,3]), self.reward_steps) 
+                self.summary.add_scalar("rewards/xyz", np.mean(reward_buf[:,0]))
+                self.summary.add_scalar("rewards/vel", np.mean(reward_buf[:,1])) 
+                self.summary.add_scalar("rewards/ang_vel", np.mean(reward_buf[:,2])) 
+                self.summary.add_scalar("rewards/d_action", np.mean(reward_buf[:,3])) 
                 self.reward_buf = []
             self.reward_steps += 1
                 
@@ -450,6 +452,9 @@ class customAviary(gym.Wrapper):
             return True
         elif np.linalg.norm(state[:3]-self.goal_pos[0,:], ord=2) > 2:
             ## Rollout early stopping
+            return True
+        elif state[2] < 1:
+            # No landing
             return True
         else:
             return False

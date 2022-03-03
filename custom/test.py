@@ -126,7 +126,7 @@ if __name__ == "__main__":
     obs = env.reset()
     start = time.time()
     epi_reward = 0
-    for i in range(2*env.SIM_FREQ):
+    for i in range(env.EPISODE_LEN_SEC*env.SIM_FREQ):
         unscaled_action, _states = model.predict(obs,
                                         deterministic=False
                                         )

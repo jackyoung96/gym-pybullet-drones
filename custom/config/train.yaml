@@ -41,6 +41,6 @@ env_kwargs:
     ang_vel: 0.16
     # action: 1
     d_action: 0.004
-  episode_len_sec: 3
+  episode_len_sec: 2
   max_rpm: 65535 # 2^16-1
   initial_xyzs: [[0.0,0.0,5.0]]
