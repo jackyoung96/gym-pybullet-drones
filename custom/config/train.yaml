@@ -27,20 +27,20 @@ model:
 env_kwargs:
   # observable: [pos, quaternion, rpy, vel, angular_vel, rpm]
   # observable: [rpy, vel, angular_vel, rpm]
-  observable: [pos,rotation, vel, angular_vel, rpm]
+  observable: [rotation, vel, angular_vel, rpm]
   frame_stack: 1
-  task: stabilize2
+  task: stabilize3
   rpy_noise: 1.2
   vel_noise: 1.0
   angvel_noise: 2.4
   reward_coeff: # only for stabilizing task
-    xyz: 0.2
+    # xyz: 0.2
     # rpy: 4
     # rotation: 0.1
-    vel: 0.016
-    ang_vel: 0.08
+    vel: 0.032
+    ang_vel: 0.16
     # action: 1
-    d_action: 0.002
+    d_action: 0.004
   episode_len_sec: 3
   max_rpm: 65535 # 2^16-1
   initial_xyzs: [[0.0,0.0,5.0]]

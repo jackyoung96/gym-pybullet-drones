@@ -14,7 +14,7 @@ from scipy.spatial.transform import Rotation as R
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-TASK_LIST = ['hover', 'takeoff', 'stabilize', 'stabilize2']
+TASK_LIST = ['hover', 'takeoff', 'stabilize', 'stabilize2', 'stabilize3']
 
 class customAviary(gym.Wrapper):
     def __init__(self, env, **kwargs):
@@ -391,6 +391,41 @@ class customAviary(gym.Wrapper):
                 self.summary.add_scalar("rewards/vel", np.mean(reward_buf[:,1]), self.reward_steps) 
                 self.summary.add_scalar("rewards/ang_vel", np.mean(reward_buf[:,2]), self.reward_steps) 
                 self.summary.add_scalar("rewards/d_action", np.mean(reward_buf[:,3]), self.reward_steps) 
+                self.reward_buf = []
+            self.reward_steps += 1
+                
+            return -(f_s + f_a) + done_reward
+
+        elif self.task == 'stabilize3':
+            # No position constrain
+
+            coeff = {
+                'vel': self.reward_coeff['vel'],
+                'ang_vel': self.reward_coeff['ang_vel'],
+                'd_action': self.reward_coeff['d_action']
+            }
+            vel = coeff['vel'] * np.linalg.norm(self._normalizeState(state[10:13],'vel'),ord=2)
+            ang_vel = coeff['ang_vel'] * np.linalg.norm(self._normalizeState(state[13:16],'angular_vel'),ord=2)
+            f_s = vel + ang_vel
+
+            d_action = coeff['d_action'] * np.linalg.norm(self._normalizeState(state[16:]-self.previous_state[16:],'rpm'),ord=2) if self.previous_state is not None else 0
+            f_a = d_action
+            self.previous_state = state.copy()
+
+            # done reward
+            done_reward = 0
+            done = self._computeDone()
+            if done:
+                done_reward = self.step_counter/self.SIM_FREQ - self.EPISODE_LEN_SEC
+
+            self.reward_buf.append([vel,ang_vel,d_action])
+            summary_freq = self.env.EPISODE_LEN_SEC
+            # summary_freq = 1
+            if len(self.reward_buf) >= summary_freq * 100 and self.reward_steps != 0:
+                reward_buf = np.array(self.reward_buf)
+                self.summary.add_scalar("rewards/vel", np.mean(reward_buf[:,0]), self.reward_steps) 
+                self.summary.add_scalar("rewards/ang_vel", np.mean(reward_buf[:,1]), self.reward_steps) 
+                self.summary.add_scalar("rewards/d_action", np.mean(reward_buf[:,2]), self.reward_steps) 
                 self.reward_buf = []
             self.reward_steps += 1
                 
