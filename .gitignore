@@ -1,6 +1,6 @@
 # custom
+!custom/tb_log/**/final_model.zip
 custom/tb_log/*
-!custom/tb_log/SAC_hover/final_model.zip
 
 # TODOs 
 TODOs.md
