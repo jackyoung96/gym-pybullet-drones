@@ -51,6 +51,7 @@ class customAviary(gym.Wrapper):
 
         self.env.EPISODE_LEN_SEC = kwargs.get('episode_len_sec', 3)
         self.MAX_RPM = kwargs.get('max_rpm', 2*16-1)
+        self.env.SIM_FREQ = kwargs.get('freq', 240)
 
         if not self.task in TASK_LIST:
             raise "Wrong task!!"
@@ -385,9 +386,9 @@ class customAviary(gym.Wrapper):
                 done_reward = self.step_counter/self.SIM_FREQ - self.EPISODE_LEN_SEC
 
             self.reward_buf.append([xyz,vel,ang_vel,d_action])
-            summary_freq = self.env.EPISODE_LEN_SEC
+            summary_freq = self.env.EPISODE_LEN_SEC * self.env.SIM_FREQ
             # summary_freq = 1
-            if len(self.reward_buf) >= summary_freq * 100 and self.reward_steps != 0:
+            if len(self.reward_buf) >= summary_freq and self.reward_steps != 0:
                 reward_buf = np.array(self.reward_buf)
                 self.summary.add_scalar("rewards/xyz", np.mean(reward_buf[:,0]))
                 self.summary.add_scalar("rewards/vel", np.mean(reward_buf[:,1])) 
