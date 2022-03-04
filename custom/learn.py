@@ -116,32 +116,8 @@ if __name__ == "__main__":
     callback = CallbackList([savecallback, configcallback])
 
     # model learning
-    model.learn(cfg['train']['total_timesteps'], callback=callback) # Typically not enough
-    model.save(os.path.join(model._logger.dir, "final_model"))
-
-
-    #### Show (and record a video of) the model's performance ##
-    env = make_env(gui=True,record=True, **cfg['env_kwargs'])
-    logger = Logger(logging_freq_hz=int(env.SIM_FREQ/env.AGGR_PHY_STEPS),
-                    num_drones=1
-                    )
-    obs = env.reset()
-    start = time.time()
-    for i in range(5*env.SIM_FREQ):
-        action, _states = model.predict(obs,
-                                        deterministic=True
-                                        )
-        obs, reward, done, info = env.step(action)
-        logger.log(drone=0,
-                   timestamp=i/env.SIM_FREQ,
-                   state=info['full_state'],
-                   control=np.zeros(12)
-                   )
-        if i%env.SIM_FREQ == 0:
-            env.render()
-            print(done)
-        sync(i, start, env.TIMESTEP)
-        if done:
-            obs = env.reset()
-    env.close()
-    logger.plot()
+    try: 
+        model.learn(cfg['train']['total_timesteps'], callback=callback) # Typically not enough
+        model.save(os.path.join(model._logger.dir, "final_model"))
+    except KeyboardInterrupt:
+        model.save(os.path.join(model._logger.dir, "final_model"))

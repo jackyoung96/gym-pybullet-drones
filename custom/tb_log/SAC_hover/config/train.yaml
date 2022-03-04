@@ -1,0 +1,32 @@
+RL_algo: SAC
+
+train:
+  total_timesteps: 5000000
+  save_freq: 50000
+  # pretrained: 'tb_log/SAC_12'
+  pretrained: null
+
+model:
+  tensorboard_log: "tb_log"
+  learning_rate: 0.0003
+  buffer_size: 1000000
+  learning_starts: 10000
+  batch_size: 256
+  tau: 0.05
+  gamma: 0.99
+  train_freq: 4
+  gradient_steps: 1
+  policy_kwargs:
+    net_arch: 
+      pi: [128,128]
+      qf: [400,300]
+    activation_fn: Tanh
+    
+  
+
+env_kwargs:
+  # observable: [pos, quaternion, rpy, vel, angular_vel, rpm]
+  # observable: [rpy, vel, angular_vel, rpm]
+  observable: [rpy, vel_z, angular_vel, rpm]
+  frame_stack: 4
+  task: hover

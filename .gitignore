@@ -1,7 +1,8 @@
 # custom
 custom/tb_log/reward_test
-custom/tb_log/*/*
-!custom/tb_log/*/final_model.zip
+custom/tb_log/*/ckpt/
+custom/tb_log/*/events.out.tfevents*
+
 
 # TODOs 
 TODOs.md
