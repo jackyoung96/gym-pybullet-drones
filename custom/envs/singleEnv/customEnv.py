@@ -390,10 +390,10 @@ class customAviary(gym.Wrapper):
             # summary_freq = 1
             if len(self.reward_buf) >= summary_freq and self.reward_steps != 0:
                 reward_buf = np.array(self.reward_buf)
-                self.summary.add_scalar("rewards/xyz", np.mean(reward_buf[:,0]))
-                self.summary.add_scalar("rewards/vel", np.mean(reward_buf[:,1])) 
-                self.summary.add_scalar("rewards/ang_vel", np.mean(reward_buf[:,2])) 
-                self.summary.add_scalar("rewards/d_action", np.mean(reward_buf[:,3])) 
+                self.summary.add_scalar("rewards/xyz", np.mean(reward_buf[:,0]),self.reward_steps)
+                self.summary.add_scalar("rewards/vel", np.mean(reward_buf[:,1]),self.reward_steps) 
+                self.summary.add_scalar("rewards/ang_vel", np.mean(reward_buf[:,2]),self.reward_steps) 
+                self.summary.add_scalar("rewards/d_action", np.mean(reward_buf[:,3]),self.reward_steps) 
                 self.reward_buf = []
             self.reward_steps += 1
                 
