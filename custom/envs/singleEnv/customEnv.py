@@ -70,7 +70,8 @@ class customAviary(gym.Wrapper):
         #                                       physicsClientId=self.env.CLIENT
         #                                       ) for i in range(self.env.NUM_DRONES)])
 
-        shutil.rmtree('tb_log/reward_test')
+        if os.path.isdir('tb_log/reward_test'):
+            shutil.rmtree('tb_log/reward_test')
         self.summary = SummaryWriter('tb_log/reward_test')
         self.reward_buf = []
         self.reward_steps = 0

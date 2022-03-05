@@ -77,6 +77,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=str, required=True, help="model and config file saved path")
     parser.add_argument('--record', action='store_true', help="video record ./files/videos")
+    parser.add_argument('--render', action='store_true', help="rendering gui")
     args = parser.parse_args()
 
     #### Define and parse (optional) arguments for the script ##
@@ -119,7 +120,7 @@ if __name__ == "__main__":
 
 
     #### Show (and record a video of) the model's performance ##
-    env = make_env(gui=True,record=args.record, **cfg['env_kwargs'])
+    env = make_env(gui=args.render,record=args.record, **cfg['env_kwargs'])
     logger = Logger(logging_freq_hz=int(env.SIM_FREQ/env.AGGR_PHY_STEPS),
                     num_drones=1
                     )
@@ -127,9 +128,11 @@ if __name__ == "__main__":
     start = time.time()
     epi_reward = 0
     for i in range(env.EPISODE_LEN_SEC*env.SIM_FREQ):
+        # start = time.time()
         unscaled_action, _states = model.predict(obs,
                                         deterministic=False
                                         )
+        # print("time check %.3f ms"%((time.time()-start)*1000))
         action = model.policy.scale_action(unscaled_action)
 
         obs, reward, done, info = env.step(action)
@@ -140,7 +143,8 @@ if __name__ == "__main__":
                    )
         epi_reward += reward
         if i%env.SIM_FREQ == 0:
-            env.render()
+            if args.render:
+                env.render()
             print(done)
         # input()
         sync(i, start, env.TIMESTEP)
