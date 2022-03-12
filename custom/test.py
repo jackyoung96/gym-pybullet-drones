@@ -39,11 +39,12 @@ from gym_pybullet_drones.envs.BaseAviary import DroneModel, Physics, BaseAviary
 from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import ActionType, ObservationType, BaseSingleAgentAviary
 from gym_pybullet_drones.utils.utils import sync, str2bool
 from envs.singleEnv.customEnv import customAviary
+from envs.singleEnv.domainRandomEnv import domainRandomAviary
 
 from utils import configCallback, saveCallback
 
 
-def make_env(gui=False,record=False, **kwargs):
+def make_env(gui=False,record=False,randomize=False, **kwargs):
     env = gym.make(id="takeoff-aviary-v0", # arbitrary environment that has state normalization and clipping
                     drone_model=DroneModel.CF2X,
                     initial_xyzs=np.array([[0.0,0.0,1.0]]),
@@ -55,7 +56,15 @@ def make_env(gui=False,record=False, **kwargs):
                     record=record, 
                     obs=ObservationType.KIN,
                     act=ActionType.RPM)
-    env = customAviary(env, **kwargs)
+    if not randomize:
+        env = customAviary(env, **kwargs)
+    else:
+        kwargs['mass_range'] = 0.01
+        kwargs['cm_range'] = 0.008
+        kwargs['kf_range'] = 0.0
+        kwargs['km_range'] = 0.0
+        env = domainRandomAviary(env, **kwargs)
+        env.test()
 
     return env
 
@@ -78,14 +87,15 @@ if __name__ == "__main__":
     parser.add_argument('--input', type=str, required=True, help="model and config file saved path")
     parser.add_argument('--record', action='store_true', help="video record ./files/videos")
     parser.add_argument('--render', action='store_true', help="rendering gui")
+    parser.add_argument('--randomize', action='store_true', help="randomize physical properties of the drone")
     args = parser.parse_args()
 
     #### Define and parse (optional) arguments for the script ##
     with open(os.path.join(args.input, 'config/train.yaml'),'r') as f:
         cfg = yaml.safe_load(f)
 
-    #### Check the environment's spaces ########################
-    env = make_env(gui=False,record=False,**cfg['env_kwargs'])
+    #### Check the environment's spaces ########################        
+    env = make_env(gui=False,record=False,randomize=args.randomize,**cfg['env_kwargs'])
     check_env(env,
               warn=True,
               skip_render_check=True
@@ -120,7 +130,7 @@ if __name__ == "__main__":
 
 
     #### Show (and record a video of) the model's performance ##
-    env = make_env(gui=args.render,record=args.record, **cfg['env_kwargs'])
+    env = make_env(gui=args.render,record=args.record,randomize=args.randomize, **cfg['env_kwargs'])
     logger = Logger(logging_freq_hz=int(env.SIM_FREQ/env.AGGR_PHY_STEPS),
                     num_drones=1
                     )

@@ -43,11 +43,11 @@ env_kwargs:
     d_action: 0.002
   episode_len_sec: 2
   max_rpm: 65535 # 2^16-1
-  initial_xyzs: [[0.0,0.0,5.0]]
-  freq: 200
+  initial_xyzs: [[0.0,0.0,1.5]]
+  freq: 240
 
   # randomization
   mass_range: 0.006
-  cm_range: 0.006
-  kf_range: 0.0
-  km_range: 0.0
+  cm_range: 0.005
+  kf_range: 0.2
+  km_range: 0.2

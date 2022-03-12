@@ -168,7 +168,7 @@ class customAviary(gym.Wrapper):
         self.env.PLANE_ID = p.loadURDF("plane.urdf", physicsClientId=self.env.CLIENT)
 
         # Put gaussian noise to initialize RPY
-        self.env.DRONE_IDS = np.array([p.loadURDF(os.path.dirname(os.path.abspath(__file__))+"/../../../gym_pybullet_drones/assets/"+self.env.URDF,
+        self.env.DRONE_IDS = np.array([p.loadURDF(os.path.dirname(os.path.abspath(__file__))+"/../../assets/"+self.env.URDF,
                                               self.env.INIT_XYZS[i,:],
                                               p.getQuaternionFromEuler(self.env.INIT_RPYS[i,:] + self.rpy_noise*np.random.normal(0.0,1.0,self.env.INIT_RPYS[i,:].shape)),
                                               flags = p.URDF_USE_INERTIA_FROM_FILE,
@@ -383,8 +383,8 @@ class customAviary(gym.Wrapper):
             # done reward
             done_reward = 0
             done = self._computeDone()
-            if done:
-                done_reward = self.step_counter/self.SIM_FREQ - self.EPISODE_LEN_SEC
+            if done:    
+                done_reward = -(self.EPISODE_LEN_SEC-self.step_counter/self.SIM_FREQ)
 
             self.reward_buf.append([xyz,vel,ang_vel,d_action])
             summary_freq = self.env.EPISODE_LEN_SEC * self.env.SIM_FREQ
@@ -455,9 +455,9 @@ class customAviary(gym.Wrapper):
         elif np.linalg.norm(state[:3]-self.goal_pos[0,:], ord=2) > 2:
             ## Rollout early stopping
             return True
-        elif state[2] < 1:
-            # No landing
-            return True
+        # elif state[2] < 1:
+        #     # No landing
+        #     return True
         else:
             return False
 

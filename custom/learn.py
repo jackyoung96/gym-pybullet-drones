@@ -39,11 +39,13 @@ from gym_pybullet_drones.envs.BaseAviary import DroneModel, Physics, BaseAviary
 from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import ActionType, ObservationType, BaseSingleAgentAviary
 from gym_pybullet_drones.utils.utils import sync, str2bool
 from envs.singleEnv.customEnv import customAviary
+from envs.singleEnv.domainRandomEnv import domainRandomAviary
 
 from utils import configCallback, saveCallback
 
 
 def make_env(gui=False,record=False, **kwargs):
+    
     env = gym.make(id="takeoff-aviary-v0", # arbitrary environment that has state normalization and clipping
                     drone_model=DroneModel.CF2X,
                     initial_xyzs=np.array([[0.0,0.0,2.0]]),
@@ -55,7 +57,13 @@ def make_env(gui=False,record=False, **kwargs):
                     record=record, 
                     obs=ObservationType.KIN,
                     act=ActionType.RPM)
-    env = customAviary(env, **kwargs)
+    if kwargs.get('mass_range',None) is not None or\
+        kwargs.get('cm_range',None) is not None or\
+        kwargs.get('kf_range',None) is not None or\
+        kwargs.get('km_range',None) is not None:
+        env = domainRandomAviary(env, **kwargs)
+    else:
+        env = customAviary(env, **kwargs)
 
     return env
 
