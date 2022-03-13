@@ -1,5 +1,6 @@
 import os
 import shutil
+from time import sleep
 
 from stable_baselines3.common.callbacks import CallbackList, CheckpointCallback, EvalCallback, BaseCallback
 
@@ -49,7 +50,6 @@ def angular_velocity(R, dt):
 def motorRun(cf, thrust):
     for i in range(4):
         cf.param.set_value("motorPowerSet.m%d"%(i+1), thrust[i])
- 
 
 class saveCallback(CheckpointCallback):
     def __init__(self, save_freq, name_prefix="ckpt", verbose=0):

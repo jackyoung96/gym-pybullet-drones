@@ -12,7 +12,7 @@ from cflib.utils import uri_helper
 address = uri_helper.address_from_env(default=0xE7E7E7E702)
 
 def motorRun(cf, num, second):
-    cf.param.set_value("motorPowerSet.m%d"%num, 20000)
+    cf.param.set_value("motorPowerSet.m%d"%num, 10000)
     time.sleep(second)
     cf.param.set_value("motorPowerSet.m%d"%num, 0)
 
